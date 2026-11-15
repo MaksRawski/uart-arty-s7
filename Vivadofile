@@ -1,0 +1,16 @@
+sources=(src/* *.hex)
+
+# The directory where generated bitstream is put
+bit_dir=./build
+
+top_modules=(
+	top:Arty-S7-50.xdc
+)
+
+top_module=top
+
+# Name of your board in vivado.
+board="xc7s50csga324-1"
+
+# It's recommanded to set thread_num to cores of your CPU.
+thread_num=12
