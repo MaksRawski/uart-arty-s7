@@ -23,9 +23,9 @@ TARGET = $(TOP_MODULE)
 sim: build/tbs/$(TARGET)
 	./build/tbs/$(TARGET)
 
-build/tbs/%: $(TBS_DIR)/%.v $(SRC_DIR)/%.v
+build/tbs/%: $(TBS_DIR)/%_tb.v $(SRC_DIR)/*
 	@mkdir -p build/tbs
-	iverilog -Wall -s $(TARGET)_tb -y$(SRC_DIR) -I$(SRC_DIR) -o $@ $<
+	iverilog -Wall -y$(SRC_DIR) -I$(SRC_DIR) -o $@ $<
 
 synth: $(BUILD_DIR)/checkpoints/post_synth.dcp
 
