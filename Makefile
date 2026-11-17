@@ -44,6 +44,13 @@ $(BUILD_DIR)/$(TOP_MODULE).bit: $(BUILD_DIR)/checkpoints/post_impl.dcp
 	@mv $(BUILD_DIR)/logs/bit.log $(BUILD_DIR)/logs/bit.backup.log 2> /dev/null || true
 	$(VIVADO_BIN) $< -mode batch -nojournal -log $(BUILD_DIR)/logs/bit.log -source scripts/bit.tcl
 
+gui: $(BUILD_DIR)/vivado_project.xpr
+	@mv $(BUILD_DIR)/logs/gui.log $(BUILD_DIR)/logs/gui.backup.log 2> /dev/null || true
+	$(VIVADO_BIN) $< -nojournal -log $(BUILD_DIR)/logs/gui.log
+
+$(BUILD_DIR)/vivado_project.xpr: 
+	$(VIVADO_BIN) -mode batch -nojournal -log $(BUILD_DIR)/logs/bit.log -source scripts/proj_init.tcl
+
 # to create a report we need the design to be at least synthesized
 # and recipe for post_synth_util.rpt requires synthesis
 # additionally if the design is implemented we generate the implementation reports
@@ -69,4 +76,4 @@ burn: $(BUILD_DIR)/$(TOP_MODULE).bit
 clean:
 	rm -rf $(BUILD_DIR) .Xil
 
-.PHONY: sim synth impl bit prog clean
+.PHONY: sim synth impl bit gui prog clean
