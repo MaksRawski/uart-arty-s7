@@ -1,3 +1,32 @@
+// Asynchronous "driver" for the HD44780U LCD.
+// Async in the sense that commands/data can be pushed at 100MHZ rate and this module will handle busy flag waiting.
+//
+// Pins on the LCD and their connections to FPGA and the HD44780U module below:
+// LCD:  | VSS | VDD |     V0      |  RS |  RW |  E |  D[0-7] |  A  |  K  |
+// FPGA: | GND | 5V0 | POT 10K GND | .RS | .RW | .E |    .D   | 5V0 | GND |
+//
+// MIT License
+//
+// Copyright (c) 2026 Maksymilian Rawski
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
 // TODO: add rst circuitry to everything
 
 module LCDCommandQueue (
@@ -38,9 +67,6 @@ module LCDCommandQueue (
   end
 endmodule
 
-// Pins on the LCD and their connections:
-// LCD:  | VSS | VDD |     V0      |  RS |  RW |  E |  D[0-7] |  A  |  K  |
-// FPGA: | GND | 5V0 | POT 10K GND | .RS | .RW | .E |    .D   | VCC | GND |
 module HD44780U (
     input            CLK100MHZ,
     input            enable,
@@ -51,13 +77,12 @@ module HD44780U (
     output reg       RS = 1,
     output reg       RW = 0      // 0 - read, 1 - write
 );
-  // 200khz clk
+  // 100khz clk
   reg lcd_clk = 0;
   reg [31:0] counter = 32'b0;
   always @(posedge CLK100MHZ) begin
     counter = counter + 1;
-    // TODO: change this back to 100k after debugging
-    if (counter == 100_000) begin
+    if (counter == 500) begin
       counter <= 0;
       lcd_clk <= ~lcd_clk;
     end
@@ -111,4 +136,3 @@ module HD44780U (
     end
   end
 endmodule
-
