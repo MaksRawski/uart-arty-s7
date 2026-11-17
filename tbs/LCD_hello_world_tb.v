@@ -15,13 +15,15 @@ module LCD_hello_world_tb;
       .lcd_data(lcd_work_data)
   );
 
+  always @(posedge clk) if (lcd_work_enable) $write("%c", lcd_work_data);
+
+
   initial begin
     $dumpfile("LCD_hello_world_tb.vcd");
     $dumpvars(0, LCD_hello_world_tb);
-    #4;
     lcd_init_done <= 1;
-    #2;
-
+    #22;
+    $write("\n");
     $finish;
   end
 

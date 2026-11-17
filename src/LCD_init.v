@@ -13,7 +13,7 @@ module LCD_init (
   always @(posedge CLK100MHZ) begin
     if (lcd_init && !lcd_init_old) begin
        lcd_init_seq <= 4'b0001;
-       init_done = 0;
+       init_done <= 0;
     end
     lcd_init_old <= lcd_init;
 

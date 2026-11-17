@@ -27,8 +27,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-// TODO: add rst circuitry to everything
-
 module LCDCommandQueue (
     input            enqueue_clk,
     input            dequeue_clk,
@@ -47,7 +45,7 @@ module LCDCommandQueue (
     if (enqueue) begin
       if ((enqueue_i + 1) % 40 == dequeue_i) $display("LCDCommandQueue is full!");
       else begin
-        $display("[%4t] Enqueuing: %9b", $time, data);
+        // $display("[%6t] Enqueuing: %9b", $time, data);
         queue[enqueue_i] <= data;
         enqueue_i <= (enqueue_i + 1) % 40;
       end
@@ -55,13 +53,14 @@ module LCDCommandQueue (
   end
   always @(posedge dequeue_clk) begin
     // $display("enqueue_i = %d, dequeue_i", enqueue_i, dequeue_i);
-    out <= 9'bz;
+    out = 9'bz;
     if (dequeue) begin
       if (!non_empty) $display("LCDCommandQueue is empty!");
       else begin
-        out <= queue[dequeue_i];
+        // NOTE: if this was nonblocking then output would be only availble at the next clock edge
+        out = queue[dequeue_i];
         dequeue_i <= (dequeue_i + 1) % 40;
-        $strobe("[%4t] Dequeuing: %9b", $time, out);
+        // $display("[%6t] Dequeuing: %9b", $time, out);
       end
     end
   end
@@ -121,6 +120,7 @@ module HD44780U (
     end else lcd_busy <= D[7];
 
     if (!lcd_busy && queue_non_empty) begin
+      // TODO: we should wait for one cycle after setting queue_dequeue, so as to give queue_out time 
       if (!dequeue_ready) begin
         queue_dequeue <= 1;
         dequeue_ready <= 1;
@@ -128,6 +128,8 @@ module HD44780U (
         dequeue_ready <= 0;
         RW <= 1;
         RS <= queue_out[8];
+        if (queue_out[8]) $display("LCD COMMAND: %2x", queue_out[7:0]);
+        else $write("%c", queue_out[7:0]);
         D_write <= 1;
         D_data <= queue_out[7:0];
         E <= 1;
